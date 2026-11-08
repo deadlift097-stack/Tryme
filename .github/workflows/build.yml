@@ -1,0 +1,48 @@
+name: Build LeviPack
+
+on:
+  push:
+    branches: [ "main", "master" ]
+  pull_request:
+    branches: [ "main", "master" ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Android NDK
+        uses: nsetup/setup-ndk@v3
+        with:
+          ndk-version: r25c
+
+      - name: Build shared library (arm64-v8a)
+        run: |
+          cmake -B build \
+            -DCMAKE_TOOLCHAIN_FILE=$ANDROID_NDK_ROOT/build/cmake/android.toolchain.cmake \
+            -DANDROID_ABI=arm64-v8a \
+            -DANDROID_PLATFORM=android-24 \
+            -DCMAKE_BUILD_TYPE=Release
+          cmake --build build --config Release
+
+      - name: Assemble .levipack Package
+        run: |
+          mkdir -p dist
+          cp build/libBarelyEnoughItems.so dist/
+          cp levimod.json dist/
+          if [ -d "assets" ]; then cp -r assets dist/; fi
+          
+          cd dist
+          zip -r ../BarelyEnoughItems-v0.1.3.levipack .
+          cd ..
+
+      - name: Upload LeviPack Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: BarelyEnoughItems-levipack
+          path: BarelyEnoughItems-v0.1.3.levipack
+          
