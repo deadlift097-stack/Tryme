@@ -1,0 +1,7 @@
+{
+  "name": "clange_me",
+  "version": "1.0.0",
+  "description": "A native client-side optimization mod for Minecraft Bedrock on LeviLauncher.",
+  "authors": ["Dead Lift"],
+  "entry": "libclange_me.so"
+}
